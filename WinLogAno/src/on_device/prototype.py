@@ -1,15 +1,40 @@
 # src/on_device/prototype.py
 
 import os
+import sys
 import joblib
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-from tensorflow.keras.models import load_model as keras_load_model
-from src.data_processing.log_parser import preprocess_logs
-from src.features.build_features import markov_features, fft_features, sequence_features, keyword_features
+import time
+from datetime import datetime, timedelta
+
+try:
+    from tensorflow.keras.models import load_model as keras_load_model
+except ImportError:
+    print("Warning: TensorFlow/Keras not installed. Keras autoencoder will not be available.")
+    keras_load_model = None
+
+# Path configuration
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+# Import custom modules
+try:
+    from src.data_processing.log_parser import parse_log_files, clean_log_data
+    from src.features.build_features import (
+        calculate_markov_features,
+        calculate_fft_features,
+        calculate_sequence_features,
+        calculate_keyword_features
+    )
+except ImportError as e:
+    print(f"Error importing from src: {e}")
+    print("Ensure you are running from the project root and all __init__.py files are present.")
+    sys.exit(1)
 
 
 class HybridModelPyTorch(nn.Module):
@@ -18,24 +43,20 @@ class HybridModelPyTorch(nn.Module):
     def __init__(self, agg_dim, seq_length, vocab_size, unsup_dim,
                  embedding_dim=32, lstm_units=64, dense_units=64):
         super(HybridModelPyTorch, self).__init__()
-
         # Aggregate feature branch
         self.agg_dense = nn.Sequential(
             nn.Linear(agg_dim, dense_units),
             nn.ReLU(),
             nn.BatchNorm1d(dense_units)
         )
-
         # Sequence branch
         self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=0)
         self.lstm = nn.LSTM(embedding_dim, lstm_units, batch_first=True)
-
         # Unsupervised features branch
         self.unsup_dense = nn.Sequential(
             nn.Linear(unsup_dim, dense_units // 2),
             nn.ReLU()
         )
-
         # Combined processing
         combined_dim = dense_units + lstm_units + (dense_units // 2)
         self.combined = nn.Sequential(
@@ -46,16 +67,11 @@ class HybridModelPyTorch(nn.Module):
         )
 
     def forward(self, x_agg, x_seq, x_unsup):
-        # Process each branch
         agg_out = self.agg_dense(x_agg)
-
         embedded = self.embedding(x_seq)
         _, (hidden, _) = self.lstm(embedded)
         seq_out = hidden[-1]  # Last layer hidden state
-
         unsup_out = self.unsup_dense(x_unsup)
-
-        # Combine features
         combined = torch.cat((agg_out, seq_out, unsup_out), dim=1)
         return self.combined(combined)
 
@@ -78,10 +94,7 @@ class RealTimeDetector:
             'high': 0.7,
             'medium': 0.6
         }
-
-        print(f"RealTimeDetector initialized on {device} with:")
-        print(f"- Hybrid model: vocab_size={self.vocab_size}, seq_length={self.seq_length}")
-        print(f"- Active thresholds: Critical>{self.thresholds['critical']}, High>{self.thresholds['high']}")
+        print(f"RealTimeDetector initialized on {device}")
 
     def load_models(self):
         """Load all required models and resources"""
@@ -95,7 +108,8 @@ class RealTimeDetector:
 
         # Load unsupervised models
         self.iso_forest = joblib.load(os.path.join(self.model_dir, 'isolation_forest.joblib'))
-        self.autoencoder = keras_load_model(os.path.join(self.model_dir, 'autoencoder_model.h5'))
+        if keras_load_model:
+            self.autoencoder = keras_load_model(os.path.join(self.model_dir, 'autoencoder_model.h5'))
 
         # Get model parameters
         self.vocab_size = len(self.tokenizer.word_index) + 1
@@ -110,10 +124,10 @@ class RealTimeDetector:
 
     def load_pytorch_model(self, model_path):
         """Load PyTorch model with architecture parameters"""
-        # First load the state dict to get parameters
+        # Load the state dict to get parameters
         checkpoint = torch.load(model_path, map_location=self.device)
 
-        # Reconstruct model architecture
+        # Reconstruct model
         model = HybridModelPyTorch(
             agg_dim=checkpoint['agg_dim'],
             seq_length=checkpoint['seq_length'],
@@ -126,52 +140,51 @@ class RealTimeDetector:
         model.eval()
         return model
 
-    def process_log_window(self, log_df):
-        """Process a window of logs for anomaly detection"""
-        # Preprocessing
-        cleaned_df = preprocess_logs(log_df)
-
-        # Feature extraction
-        features = self.extract_features(cleaned_df)
-
-        # Prepare model inputs
-        inputs = self.prepare_model_inputs(features)
-
-        # Model prediction
-        with torch.no_grad():
-            prediction = self.model(*inputs)
-            proba = prediction.item()
-
-        # Get unsupervised features
-        unsup_features = self.get_unsupervised_features(features['agg_features'])
-
-        # Determine alert level
-        alert_level = self.determine_alert_level(
-            proba,
-            features,
-            unsup_features
-        )
-
-        return alert_level, proba, features
+    def preprocess_window(self, raw_window_df):
+        """Preprocess a window of raw logs"""
+        # Placeholder - replace with your actual preprocessing logic
+        # This should include:
+        #   - Timestamp parsing
+        #   - Event type classification
+        #   - Session identification
+        #   - Hex code extraction
+        cleaned_df = raw_window_df.copy()
+        if 'timecreated' in cleaned_df.columns:
+            cleaned_df['timecreated'] = pd.to_datetime(cleaned_df['timecreated'], errors='coerce', utc=True)
+            cleaned_df.dropna(subset=['timecreated'], inplace=True)
+        return cleaned_df
 
     def extract_features(self, cleaned_df):
         """Extract all required features from log data"""
         features = {}
 
         # Markov transition features
-        markov = markov_features(cleaned_df)
-        features.update(markov)
+        if not cleaned_df.empty:
+            markov = calculate_markov_features(cleaned_df)
+            features.update(markov)
 
         # FFT features
-        time_series = cleaned_df.groupby(pd.Grouper(key='timestamp', freq='1min')).size()
-        features['beaconing_score'] = fft_features(time_series.fillna(0).values)
+        if not cleaned_df.empty and 'timecreated' in cleaned_df.columns:
+            time_series = cleaned_df.set_index('timecreated').resample('1min').size()
+            features['beaconing_score'] = calculate_fft_features(time_series.fillna(0).values)
+        else:
+            features['beaconing_score'] = 0.0
 
         # Sequence features
-        sequences = cleaned_df.groupby('session_id')['event_id'].apply(list)
-        features['predictability'], features['pair_entropy'], _ = sequence_features(sequences)
+        if not cleaned_df.empty:
+            predictability, entropy, max_chain = calculate_sequence_features(cleaned_df)
+            features['predictability'] = predictability
+            features['pair_entropy'] = entropy
+        else:
+            features['predictability'] = 1.0
+            features['pair_entropy'] = 0.0
 
         # Keyword features
-        features['malicious_tool_freq'] = keyword_features(cleaned_df['message'].tolist())
+        if not cleaned_df.empty and 'message' in cleaned_df.columns:
+            messages = cleaned_df['message'].tolist()
+            features['malicious_tool_freq'] = calculate_keyword_features(messages)
+        else:
+            features['malicious_tool_freq'] = 0.0
 
         # Aggregate features for model
         agg_feature_names = [
@@ -181,6 +194,9 @@ class RealTimeDetector:
         ]
         features['agg_features'] = np.array([[features[k] for k in agg_feature_names]])
 
+        # Store event IDs for sequence processing
+        features['event_ids'] = cleaned_df['id'].tolist() if 'id' in cleaned_df.columns else []
+
         return features
 
     def prepare_model_inputs(self, features):
@@ -189,14 +205,16 @@ class RealTimeDetector:
         agg_scaled = self.scaler.transform(features['agg_features'])
 
         # Prepare sequence data
-        event_ids = features.get('sequence', [])
+        event_ids = features.get('event_ids', [])
         if not event_ids:  # Handle empty sequences
-            event_ids = [0]
+            seq_tokenized = [[0]]
+        else:
+            seq_tokenized = self.tokenizer.texts_to_sequences([list(map(str, event_ids))])
 
-        # Tokenize and pad sequence
-        seq_tokenized = self.tokenizer.texts_to_sequences([list(map(str, event_ids))])
-        seq_padded = np.zeros((1, self.seq_length))
-        seq_padded[0, :len(seq_tokenized[0])] = seq_tokenized[0][:self.seq_length]
+        # Pad sequence
+        from tensorflow.keras.preprocessing.sequence import pad_sequences as keras_pad_sequences
+        seq_padded = keras_pad_sequences(seq_tokenized, maxlen=self.seq_length,
+                                         padding='post', truncating='post', value=0)
 
         # Unsupervised features
         unsup_features = self.get_unsupervised_features(agg_scaled)
@@ -211,17 +229,24 @@ class RealTimeDetector:
     def get_unsupervised_features(self, agg_features):
         """Generate unsupervised features for a single window"""
         # Reconstruction error
-        recon = self.autoencoder.predict(agg_features)
-        rec_error = np.mean(np.square(agg_features - recon))
+        if self.autoencoder:
+            recon = self.autoencoder.predict(agg_features)
+            rec_error = np.mean(np.square(agg_features - recon))
+        else:
+            rec_error = 0.0
 
         # Isolation forest score
         iso_score = self.iso_forest.decision_function(agg_features)[0]
 
-        # Normalize to [0, 1]
-        rec_error_norm = (rec_error - self.baseline['rec_error_min']) / \
-                         (self.baseline['rec_error_max'] - self.baseline['rec_error_min'] + 1e-9)
-        iso_score_norm = (iso_score - self.baseline['iso_score_min']) / \
-                         (self.baseline['iso_score_max'] - self.baseline['iso_score_min'] + 1e-9)
+        # Normalize to [0, 1] using baseline
+        rec_error_norm = (rec_error - self.baseline.get('rec_error_min', 0)) / \
+                         (self.baseline.get('rec_error_max', 1) - self.baseline.get('rec_error_min', 0) + 1e-9)
+        iso_score_norm = (iso_score - self.baseline.get('iso_score_min', -0.5)) / \
+                         (self.baseline.get('iso_score_max', 0.5) - self.baseline.get('iso_score_min', -0.5) + 1e-9)
+
+        # Clip to avoid extreme values
+        rec_error_norm = np.clip(rec_error_norm, 0, 1)
+        iso_score_norm = np.clip(iso_score_norm, 0, 1)
 
         return np.array([[rec_error_norm, iso_score_norm]])
 
@@ -240,83 +265,118 @@ class RealTimeDetector:
             return "HIGH"
 
         # Novel pattern detection
-        if (unsup_features[0, 0] > 0.8 or  # High reconstruction error
-            unsup_features[0, 1] < -0.5) and  # Low isolation score
-            proba > self.thresholds['medium']:
+        if ((unsup_features[0, 0] > 0.8 or  # High reconstruction error
+             unsup_features[0, 1] < -0.5) and  # Low isolation score
+                proba > self.thresholds['medium']):
             return "MEDIUM"
 
         return "NORMAL"
 
-    def update_baseline(self, new_normal_data):
-        """Update baseline statistics with new normal data"""
-        # Update reconstruction baseline
-        new_rec_errors = []
-        new_iso_scores = []
+    def process_log_window(self, raw_window_df):
+        """Process a window of logs for anomaly detection"""
+        # Preprocessing
+        cleaned_df = self.preprocess_window(raw_window_df)
+        if cleaned_df.empty:
+            return "NORMAL", 0.0, {}
 
-        for data in new_normal_data:
-            features = self.extract_features(data)
-            agg_features = features['agg_features']
+        # Feature extraction
+        features = self.extract_features(cleaned_df)
 
-            # Calculate reconstruction error
-            recon = self.autoencoder.predict(agg_features)
-            rec_error = np.mean(np.square(agg_features - recon))
-            new_rec_errors.append(rec_error)
+        # Prepare model inputs
+        inputs = self.prepare_model_inputs(features)
 
-            # Isolation forest score
-            iso_score = self.iso_forest.decision_function(agg_features)[0]
-            new_iso_scores.append(iso_score)
+        # Model prediction
+        with torch.no_grad():
+            prediction = self.model(*inputs)
+            proba = prediction.item()
 
-        # Update min/max ranges
-        self.baseline['rec_error_min'] = min(self.baseline.get('rec_error_min', float('inf')), min(new_rec_errors))
-        self.baseline['rec_error_max'] = max(self.baseline.get('rec_error_max', 0), max(new_rec_errors))
-        self.baseline['iso_score_min'] = min(self.baseline.get('iso_score_min', float('inf')), min(new_iso_scores))
-        self.baseline['iso_score_max'] = max(self.baseline.get('iso_score_max', 0), max(new_iso_scores))
+        # Get unsupervised features
+        unsup_features = self.get_unsupervised_features(features['agg_features'])
 
-        # Update cluster history
-        cluster_labels = self.iso_forest.fit_predict(np.vstack([d['agg_features'] for d in new_normal_data))
-        self.cluster_history.update(set(cluster_labels))
+        # Determine alert level
+        alert_level = self.determine_alert_level(proba, features, unsup_features)
 
-        # Helper function for windowed processing
+        return alert_level, proba, features
 
 
 def create_log_windows(log_df, window_size='5T'):
     """Create time-based windows from log data"""
-    log_df = log_df.sort_values('timestamp')
+    if log_df.empty or 'timecreated' not in log_df.columns:
+        return []
+
+    # Ensure timestamp column is datetime
+    log_df['timecreated'] = pd.to_datetime(log_df['timecreated'], errors='coerce', utc=True)
+    log_df = log_df.dropna(subset=['timecreated']).sort_values('timecreated')
+
     windows = []
-
-    # Generate time-based windows
-    for _, window_df in log_df.groupby(pd.Grouper(key='timestamp', freq=window_size)):
-        if not window_df.empty:
-            windows.append(window_df)
-
+    for _, group in log_df.groupby(pd.Grouper(key='timecreated', freq=window_size)):
+        if not group.empty:
+            windows.append(group)
     return windows
 
 
-def run_real_time_detection(log_source, model_dir, output_handler):
-    """Main function for real-time detection"""
+def run_real_time_detection(log_file_path, model_dir, output_handler, window_size='5T'):
+    """Main function for real-time detection from a log file"""
+    # Load log data
+    print(f"Loading log data from {log_file_path}...")
+    log_df = pd.read_csv(log_file_path)
+
+    # Create time windows
+    windows = create_log_windows(log_df, window_size=window_size)
+    print(f"Created {len(windows)} time windows for processing")
+
     # Initialize detector
     detector = RealTimeDetector(model_dir, device='cuda' if torch.cuda.is_available() else 'cpu')
 
-    # Process log source (could be file, stream, etc.)
-    for raw_logs in log_source:
-        # Preprocess logs
-        cleaned_logs = preprocess_logs(raw_logs)
+    # Process each window
+    for i, window in enumerate(windows):
+        start_time = time.time()
+        alert_level, proba, features = detector.process_log_window(window)
+        proc_time = time.time() - start_time
 
-        # Create time windows
-        windows = create_log_windows(cleaned_logs)
+        window_start = window['timecreated'].iloc[0]
+        output_handler({
+            'window_id': i,
+            'timestamp': window_start,
+            'alert_level': alert_level,
+            'probability': proba,
+            'processing_time': proc_time,
+            'features': features,
+            'num_events': len(window)
+        })
 
-        for window in windows:
-            alert_level, proba, features = detector.process_log_window(window)
+        print(f"Window {i} ({window_start}) - {alert_level} alert - {proba:.2%} - {proc_time:.2f}s")
 
-            if alert_level != "NORMAL":
-                output_handler({
-                    'timestamp': window['timestamp'].iloc[0],
-                    'alert_level': alert_level,
-                    'probability': proba,
-                    'features': features,
-                    'sample_events': window[['timestamp', 'event_id', 'message']].head(2).to_dict('records')
-                })
 
-                # Optional: Update baseline with normal data periodically
-                # if time_to_update_baseline():
-                #     detector.update_baseline(recent_normal_data)
+def simple_output_handler(result):
+    """Simple output handler for detection results"""
+    timestamp = result['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+    print(f"\n[{timestamp}] Window {result['window_id']} ({result['num_events']} events)")
+    print(f"  Alert: {result['alert_level']}, Probability: {result['probability']:.2%}")
+    print(f"  Processing time: {result['processing_time']:.2f}s")
+
+    if result['alert_level'] != "NORMAL":
+        print("  Features:")
+        print(f"    - Beaconing score: {result['features']['beaconing_score']:.2f}")
+        print(f"    - Malicious tool freq: {result['features']['malicious_tool_freq']:.2f}")
+        print(f"    - Predictability: {result['features']['predictability']:.2f}")
+        print(f"    - Pair entropy: {result['features']['pair_entropy']:.2f}")
+
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Real-time Log Anomaly Detector')
+    parser.add_argument('log_file', help='Path to CSV log file')
+    parser.add_argument('--model_dir', default='models', help='Path to model directory')
+    parser.add_argument('--window_size', default='5T', help='Time window size (e.g., 5T for 5 minutes)')
+
+    args = parser.parse_args()
+
+    # Run detection
+    run_real_time_detection(
+        log_file_path=args.log_file,
+        model_dir=args.model_dir,
+        output_handler=simple_output_handler,
+        window_size=args.window_size
+    )
