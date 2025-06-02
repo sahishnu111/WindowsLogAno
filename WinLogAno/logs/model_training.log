@@ -1,0 +1,46 @@
+2025-06-02 18:10:06,122 - INFO - __main__ - Starting training pipeline with features: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:10:06,143 - INFO - __main__ - Loaded features from C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv. Shape: (3312, 11)
+2025-06-02 18:10:06,150 - INFO - __main__ - Class distribution:
+label
+0    2973
+1     339
+Name: count, dtype: int64
+2025-06-02 18:10:06,153 - INFO - __main__ - Using 9 features for training
+2025-06-02 18:10:06,164 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:10:06,164 - INFO - __main__ - Training Random Forest model...
+2025-06-02 18:10:06,553 - INFO - __main__ - Model training completed
+2025-06-02 18:10:06,690 - INFO - __main__ - 
+=== Model Evaluation ===
+2025-06-02 18:10:06,690 - INFO - __main__ - Accuracy: 0.9058
+2025-06-02 18:10:06,690 - INFO - __main__ - Precision: 0.5252
+2025-06-02 18:10:06,690 - INFO - __main__ - Recall: 0.8588
+2025-06-02 18:10:06,690 - INFO - __main__ - F1: 0.6518
+2025-06-02 18:10:06,690 - INFO - __main__ - Roc_auc: 0.9692
+2025-06-02 18:10:06,690 - INFO - __main__ - 
+Classification Report:
+2025-06-02 18:10:06,697 - INFO - __main__ -               precision    recall  f1-score   support
+
+           0       0.98      0.91      0.95       743
+           1       0.53      0.86      0.65        85
+
+    accuracy                           0.91       828
+   macro avg       0.75      0.88      0.80       828
+weighted avg       0.94      0.91      0.92       828
+
+2025-06-02 18:10:06,726 - INFO - __main__ - 
+Top 10 Features:
+2025-06-02 18:10:06,730 - INFO - __main__ -             feature  importance
+top_transition_dest    0.309592
+ top_transition_src    0.284579
+           duration    0.127409
+   prop_Information    0.101405
+        event_count    0.060301
+       prop_Warning    0.056329
+top_transition_freq    0.047575
+         prop_Error    0.011535
+  error_persistence    0.001276
+2025-06-02 18:10:06,853 - INFO - __main__ - Model saved to C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\models\trained\malware_detector_20250602_181006.joblib
+2025-06-02 18:10:07,888 - INFO - __main__ - Saved confusion matrix to C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\models\visual\confusion_matrix_20250602_181006.png
+2025-06-02 18:10:08,074 - INFO - __main__ - Saved ROC curve to C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\models\visual\roc_curve_20250602_181006.png
+2025-06-02 18:10:08,359 - INFO - __main__ - Saved feature importance plot to C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\models\visual\feature_importance_20250602_181006.png
+2025-06-02 18:10:08,359 - INFO - __main__ - Training completed successfully

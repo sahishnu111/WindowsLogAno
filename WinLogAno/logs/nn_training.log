@@ -1,0 +1,175 @@
+2025-06-02 18:39:38,587 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:39:38,610 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 18:39:38,623 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:39:38,652 - ERROR - __main__ - Critical error: 1
+Traceback (most recent call last):
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\pandas\core\indexes\base.py", line 3805, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\\_libs\\hashtable_class_helper.pxi", line 2606, in pandas._libs.hashtable.Int64HashTable.get_item
+  File "pandas\\_libs\\hashtable_class_helper.pxi", line 2630, in pandas._libs.hashtable.Int64HashTable.get_item
+KeyError: 1
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 404, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 260, in train_evaluate_model
+    train_loader, val_loader = create_data_loaders(X_train, y_train, X_test, y_test)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 140, in create_data_loaders
+    sample_weights = class_weights[y_train]
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\pandas\core\series.py", line 1121, in __getitem__
+    return self._get_value(key)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\pandas\core\series.py", line 1237, in _get_value
+    loc = self.index.get_loc(label)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\pandas\core\indexes\base.py", line 3812, in get_loc
+    raise KeyError(key) from err
+KeyError: 1
+2025-06-02 18:46:18,564 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:46:18,580 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 18:46:18,589 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:46:18,615 - ERROR - __main__ - Critical error: must be real number, not builtin_function_or_method
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 416, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 272, in train_evaluate_model
+    train_loader, val_loader = create_data_loaders(X_train, y_train, X_test, y_test)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 157, in create_data_loaders
+    train_dataset = MalwareDataset(X_train_tensor, y_train_tensor)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 88, in __init__
+    self.features = torch.tensor(features.values, dtype=torch.float32)
+TypeError: must be real number, not builtin_function_or_method
+2025-06-02 18:48:25,381 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:48:25,388 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 18:48:25,391 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:48:28,168 - ERROR - __main__ - Critical error: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 422, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 306, in train_evaluate_model
+    loss = criterion(outputs, labels)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\loss.py", line 697, in forward
+    return F.binary_cross_entropy(
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\functional.py", line 3545, in binary_cross_entropy
+    raise ValueError(
+ValueError: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
+2025-06-02 18:50:28,847 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:50:28,865 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 18:50:28,881 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:50:31,380 - ERROR - __main__ - Critical error: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 419, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 303, in train_evaluate_model
+    loss = criterion(outputs, labels)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\loss.py", line 697, in forward
+    return F.binary_cross_entropy(
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\functional.py", line 3545, in binary_cross_entropy
+    raise ValueError(
+ValueError: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
+2025-06-02 18:51:31,673 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:51:31,696 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 18:51:31,706 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:51:31,733 - ERROR - __main__ - Critical error: You passed a method '.values' instead of actual values
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 424, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 280, in train_evaluate_model
+    train_loader, val_loader = create_data_loaders(X_train, y_train, X_test, y_test)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 165, in create_data_loaders
+    train_dataset = MalwareDataset(X_train_tensor, y_train_tensor)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 94, in __init__
+    raise ValueError("You passed a method '.values' instead of actual values")
+ValueError: You passed a method '.values' instead of actual values
+2025-06-02 18:53:04,274 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:53:04,293 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 18:53:04,310 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:53:04,340 - ERROR - __main__ - Critical error: You passed a method '.values' instead of actual values
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 426, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 280, in train_evaluate_model
+    train_loader, val_loader = create_data_loaders(X_train, y_train, X_test, y_test)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 165, in create_data_loaders
+    train_dataset = MalwareDataset(X_train_tensor, y_train_tensor)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 94, in __init__
+    raise ValueError("You passed a method '.values' instead of actual values")
+ValueError: You passed a method '.values' instead of actual values
+2025-06-02 18:55:14,278 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:55:14,294 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 18:55:14,303 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:55:14,331 - ERROR - __main__ - Critical error: You passed a method '.values' instead of actual values
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 429, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 283, in train_evaluate_model
+    train_loader, val_loader = create_data_loaders(X_train, y_train, X_test, y_test)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 168, in create_data_loaders
+    train_dataset = MalwareDataset(X_train_tensor, y_train_tensor)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 94, in __init__
+    raise ValueError("You passed a method '.values' instead of actual values")
+ValueError: You passed a method '.values' instead of actual values
+2025-06-02 18:58:43,216 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:58:43,239 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 18:58:43,249 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:58:45,606 - ERROR - __main__ - Critical error: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 437, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 320, in train_evaluate_model
+    loss = criterion(outputs, labels)  # labels should also be (batch_size,)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\loss.py", line 697, in forward
+    return F.binary_cross_entropy(
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\functional.py", line 3545, in binary_cross_entropy
+    raise ValueError(
+ValueError: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
+2025-06-02 18:59:26,873 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 18:59:26,880 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 18:59:26,883 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 18:59:28,834 - ERROR - __main__ - Critical error: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 424, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 307, in train_evaluate_model
+    loss = criterion(outputs, labels)  # labels should also be (batch_size,)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\loss.py", line 697, in forward
+    return F.binary_cross_entropy(
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\functional.py", line 3545, in binary_cross_entropy
+    raise ValueError(
+ValueError: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
+2025-06-02 19:00:08,219 - INFO - __main__ - Starting neural network training with data: C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\data\processed\session_features.csv
+2025-06-02 19:00:08,227 - INFO - __main__ - Using 9 features: ['duration', 'event_count', 'prop_Information', 'prop_Warning', 'prop_Error', 'top_transition_src', 'top_transition_dest', 'top_transition_freq', 'error_persistence']
+2025-06-02 19:00:08,231 - INFO - __main__ - Train shape: (2484, 9), Test shape: (828, 9)
+2025-06-02 19:00:09,872 - ERROR - __main__ - Critical error: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
+Traceback (most recent call last):
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 424, in main
+    model, metrics = train_evaluate_model(df)
+  File "C:\Users\OMEN\Downloads\WinLogAno-20250528T103217Z-1-001\WinLogAno\src\models\NN_supervised.py", line 307, in train_evaluate_model
+    loss = criterion(outputs, labels)  # labels should also be (batch_size,)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\modules\loss.py", line 697, in forward
+    return F.binary_cross_entropy(
+  File "C:\Users\OMEN\.conda\envs\log_anomaly_env\lib\site-packages\torch\nn\functional.py", line 3545, in binary_cross_entropy
+    raise ValueError(
+ValueError: Using a target size (torch.Size([64, 1])) that is different to the input size (torch.Size([64])) is deprecated. Please ensure they have the same size.
